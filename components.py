@@ -316,7 +316,7 @@ class SizeBar(ctk.CTkFrame):
         )
         lbl.pack(side="left", padx=(Spacing.PAD_MD, Spacing.PAD_SM), fill="x", expand=True)
 
-        # Size text
+        # Size text (rightmost)
         ctk.CTkLabel(
             self,
             text=size_text,
@@ -326,15 +326,16 @@ class SizeBar(ctk.CTkFrame):
             anchor="e",
         ).pack(side="right", padx=Spacing.PAD_MD)
 
-        # Progress bar
+        # Progress bar (fixed uniform width so all tracks align perfectly)
         bar = ctk.CTkProgressBar(
             self,
+            width=260,
             height=8,
             corner_radius=4,
             fg_color=Colors.BG_TERTIARY,
             progress_color=color or Colors.ACCENT,
         )
-        bar.pack(side="right", fill="x", expand=True, padx=Spacing.PAD_SM)
+        bar.pack(side="right", padx=Spacing.PAD_SM)
         bar.set(min(proportion, 1.0))
 
         if on_click:
