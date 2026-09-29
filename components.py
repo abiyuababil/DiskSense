@@ -141,54 +141,41 @@ class FileRow(ctk.CTkFrame):
         )
         self._name_lbl.pack(side="left", padx=(Spacing.PAD_MD, Spacing.PAD_SM), fill="x", expand=True)
 
-        # Detail text (right side)
-        self._detail_lbl = None
-        if detail_text:
-            self._detail_lbl = ctk.CTkLabel(
-                self,
-                text=detail_text,
-                font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.SMALL_SIZE),
-                text_color=Colors.TEXT_MUTED,
-                width=120,
-                anchor="e",
-            )
-            self._detail_lbl.pack(side="right", padx=Spacing.PAD_SM)
-
-        # Preview button (right side)
-        self._prev_btn = None
-        if on_preview:
-            self._prev_btn = ctk.CTkButton(
-                self,
-                text="👁",
-                width=30,
-                height=26,
-                corner_radius=Spacing.RADIUS_SM,
-                fg_color=Colors.BG_TERTIARY,
-                hover_color=Colors.BG_HOVER,
-                text_color=Colors.TEXT_PRIMARY,
-                font=ctk.CTkFont(size=12),
-                command=lambda: on_preview(filepath),
-            )
-            self._prev_btn.pack(side="right", padx=(0, Spacing.PAD_XS))
-
-        # Delete button (right side)
+        # 1. Delete button (paling kanan)
         self._del_btn = None
         if show_delete and on_delete:
             self._del_btn = ctk.CTkButton(
                 self,
-                text="Del",
-                width=44,
+                text="🗑️",
+                width=34,
                 height=26,
                 corner_radius=Spacing.RADIUS_SM,
                 fg_color=Colors.RED_BG,
                 hover_color=Colors.RED,
                 text_color="#ffffff",
-                font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.TINY_SIZE, weight="bold"),
+                font=ctk.CTkFont(size=13),
                 command=lambda: on_delete(filepath),
             )
             self._del_btn.pack(side="right", padx=(Spacing.PAD_XS, Spacing.PAD_SM))
 
-        # Size label (right side)
+        # 2. Preview button (sebelah kiri Delete)
+        self._prev_btn = None
+        if on_preview:
+            self._prev_btn = ctk.CTkButton(
+                self,
+                text="👁️",
+                width=34,
+                height=26,
+                corner_radius=Spacing.RADIUS_SM,
+                fg_color=Colors.BG_TERTIARY,
+                hover_color=Colors.BG_HOVER,
+                text_color=Colors.TEXT_PRIMARY,
+                font=ctk.CTkFont(size=13),
+                command=lambda: on_preview(filepath),
+            )
+            self._prev_btn.pack(side="right", padx=(Spacing.PAD_XS, Spacing.PAD_XS))
+
+        # 3. Size label (sebelah kiri Preview)
         self._size_lbl = ctk.CTkLabel(
             self,
             text=size_text,
@@ -197,7 +184,19 @@ class FileRow(ctk.CTkFrame):
             width=80,
             anchor="e",
         )
-        self._size_lbl.pack(side="right", padx=Spacing.PAD_SM)
+        self._size_lbl.pack(side="right", padx=(Spacing.PAD_SM, Spacing.PAD_SM))
+
+        # 4. Detail / Location text (sebelah kiri Size)
+        self._detail_lbl = None
+        if detail_text:
+            self._detail_lbl = ctk.CTkLabel(
+                self,
+                text=detail_text,
+                font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.SMALL_SIZE),
+                text_color=Colors.TEXT_MUTED,
+                anchor="e",
+            )
+            self._detail_lbl.pack(side="right", padx=(Spacing.PAD_SM, Spacing.PAD_MD))
 
         # Hover effect on the whole row
         self.bind("<Enter>", self._on_enter)
