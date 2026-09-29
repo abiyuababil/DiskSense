@@ -441,12 +441,11 @@ class DiskSenseApp(ctk.CTk):
                     child.destroy()
             elif isinstance(child, ctk.CTkFrame):
                 self._destroy_matching_rows(child, norm_deleted)
-                # If a sub-group frame has no remaining FileRow/SizeBar data children, clean it up
-                remaining = [
-                    c for c in child.winfo_children()
-                    if isinstance(c, (FileRow, SizeBar))
-                ]
-                if not remaining and not isinstance(child, ScrollableList):
+                # Check remaining FileRow data children
+                file_rows = [c for c in child.winfo_children() if isinstance(c, FileRow)]
+                size_bars = [c for c in child.winfo_children() if isinstance(c, SizeBar)]
+                # If a duplicate group frame now has 1 or 0 file rows left, clean it up
+                if not size_bars and len(file_rows) <= 1 and not isinstance(child, ScrollableList):
                     try:
                         child.destroy()
                     except Exception:
@@ -505,9 +504,7 @@ class DiskSenseApp(ctk.CTk):
         self._dup_list.pack(fill="both", expand=True)
 
         if self._results[0] and self._results[0].duplicates:
-            self._render_with_loading(
-                self._dup_list, self._render_duplicates, self._results[0]
-            )
+            self._render_duplicates(self._results[0])
         else:
             EmptyState(
                 self._dup_list,
@@ -739,9 +736,7 @@ class DiskSenseApp(ctk.CTk):
         self._usage_list.pack(fill="both", expand=True)
 
         if self._results[1]:
-            self._render_with_loading(
-                self._usage_list, self._render_disk_usage, self._results[1], self._usage_tab_index
-            )
+            self._render_disk_usage(self._results[1], self._usage_tab_index)
         else:
             EmptyState(
                 self._usage_list,
@@ -986,9 +981,7 @@ class DiskSenseApp(ctk.CTk):
         self._cleanup_list.pack(fill="both", expand=True)
 
         if self._results[2]:
-            self._render_with_loading(
-                self._cleanup_list, self._render_cleanup, self._results[2]
-            )
+            self._render_cleanup(self._results[2])
         else:
             EmptyState(
                 self._cleanup_list,
@@ -1150,9 +1143,7 @@ class DiskSenseApp(ctk.CTk):
         self._search_list.pack(fill="both", expand=True)
 
         if self._results[3]:
-            self._render_with_loading(
-                self._search_list, self._render_search, self._results[3]
-            )
+            self._render_search(self._results[3])
         else:
             EmptyState(
                 self._search_list,
@@ -1376,7 +1367,7 @@ class DiskSenseApp(ctk.CTk):
                     res.purge_file(filepath)
             self._selected_files.discard(filepath)
             self._status_bar.set_status(msg)
-            self._refresh_active_list()
+            self._remove_deleted_rows_from_ui({filepath})
             return
 
         success = False

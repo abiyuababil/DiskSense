@@ -410,6 +410,16 @@ class ConfirmDialog(ctk.CTkToplevel):
         confirm_color = Colors.RED if dangerous else Colors.ACCENT
         confirm_hover = Colors.RED_HOVER if dangerous else Colors.ACCENT_HOVER
 
+        def _do_confirm_click():
+            try:
+                self.grab_release()
+            except Exception:
+                pass
+            self.destroy()
+            master.update_idletasks()
+            if on_confirm:
+                on_confirm()
+
         ctk.CTkButton(
             btn_frame,
             text="Delete" if dangerous else "Confirm",
@@ -420,7 +430,7 @@ class ConfirmDialog(ctk.CTkToplevel):
             hover_color=confirm_hover,
             text_color="#ffffff",
             font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.BODY_SIZE, weight="bold"),
-            command=lambda: (on_confirm(), self.destroy()),
+            command=_do_confirm_click,
         ).pack(side="right")
 
         self.bind("<Escape>", lambda e: self.destroy())
