@@ -130,17 +130,6 @@ class FileRow(ctk.CTkFrame):
             )
             self._chk.pack(side="left", padx=(Spacing.PAD_SM, 0))
 
-        # Filename (left, expands)
-        name = filepath.split("\\")[-1] if "\\" in filepath else filepath.split("/")[-1]
-        self._name_lbl = ctk.CTkLabel(
-            self,
-            text=name,
-            font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.BODY_SIZE),
-            text_color=Colors.TEXT_PRIMARY,
-            anchor="w",
-        )
-        self._name_lbl.pack(side="left", padx=(Spacing.PAD_MD, Spacing.PAD_SM), fill="x", expand=True)
-
         # 1. Delete button (paling kanan)
         self._del_btn = None
         if show_delete and on_delete:
@@ -181,7 +170,7 @@ class FileRow(ctk.CTkFrame):
             text=size_text,
             font=ctk.CTkFont(family=Fonts.MONO, size=Fonts.SMALL_SIZE),
             text_color=Colors.ACCENT,
-            width=80,
+            width=85,
             anchor="e",
         )
         self._size_lbl.pack(side="right", padx=(Spacing.PAD_SM, Spacing.PAD_SM))
@@ -194,9 +183,21 @@ class FileRow(ctk.CTkFrame):
                 text=detail_text,
                 font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.SMALL_SIZE),
                 text_color=Colors.TEXT_MUTED,
+                width=220,
                 anchor="e",
             )
-            self._detail_lbl.pack(side="right", padx=(Spacing.PAD_SM, Spacing.PAD_MD))
+            self._detail_lbl.pack(side="right", padx=(Spacing.PAD_SM, Spacing.PAD_SM))
+
+        # 5. Filename (left, expands - packed LAST so right columns retain fixed width & alignment)
+        name = filepath.split("\\")[-1] if "\\" in filepath else filepath.split("/")[-1]
+        self._name_lbl = ctk.CTkLabel(
+            self,
+            text=name,
+            font=ctk.CTkFont(family=Fonts.FAMILY, size=Fonts.BODY_SIZE),
+            text_color=Colors.TEXT_PRIMARY,
+            anchor="w",
+        )
+        self._name_lbl.pack(side="left", padx=(Spacing.PAD_MD, Spacing.PAD_SM), fill="x", expand=True)
 
         # Hover effect on the whole row
         self.bind("<Enter>", self._on_enter)
