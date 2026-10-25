@@ -240,9 +240,12 @@ class Scanner:
                 return rec.get("total_files", 0)
         return 0
 
-    def _emit_progress(self, result: ScanResult, est_total: int = 0):
+    def _emit_progress(self, result: ScanResult, est_total: int = 0, override_pct: float = -1):
         if self._progress_callback:
-            pct = (result.files_scanned / est_total) if est_total > 0 else -1
+            if override_pct >= 0:
+                pct = override_pct
+            else:
+                pct = (result.files_scanned / est_total * 0.5) if est_total > 0 else -1
             self._progress_callback(result, pct)
 
     def _emit_complete(self, result: ScanResult):
@@ -314,9 +317,11 @@ class Scanner:
         # Phase 2: Quick hash files that share the same size
         quick_hash_groups: dict[str, list[tuple[str, int]]] = defaultdict(list)
         candidates = {s: paths for s, paths in size_groups.items() if len(paths) > 1}
+        total_quick = sum(len(paths) for paths in candidates.values())
+        quick_count = 0
 
-        result.current_path = "Hashing candidates (quick)..."
-        self._emit_progress(result)
+        result.current_path = f"Hashing candidates (quick: 0/{total_quick:,})..."
+        self._emit_progress(result, override_pct=0.5 if total_quick > 0 else -1)
 
         for size, paths in candidates.items():
             if self._cancel.is_set():
@@ -324,6 +329,12 @@ class Scanner:
             for filepath in paths:
                 if self._cancel.is_set():
                     return
+                quick_count += 1
+                if quick_count % 20 == 0 or quick_count == total_quick:
+                    pct = 0.5 + 0.35 * (quick_count / total_quick) if total_quick > 0 else 0.85
+                    result.current_path = f"Quick hash ({quick_count:,}/{total_quick:,}): {filepath}"
+                    self._emit_progress(result, override_pct=pct)
+
                 qh = self._quick_hash(filepath, size)
                 if qh:
                     quick_hash_groups[qh].append((filepath, size))
@@ -331,9 +342,11 @@ class Scanner:
         # Phase 3: Full hash where quick hashes match
         full_hash_groups: dict[str, list[tuple[str, int, float]]] = defaultdict(list)
         qh_candidates = {qh: items for qh, items in quick_hash_groups.items() if len(items) > 1}
+        total_full = sum(len(items) for items in qh_candidates.values())
+        full_count = 0
 
-        result.current_path = "Verifying duplicates (full hash)..."
-        self._emit_progress(result)
+        result.current_path = f"Verifying duplicates (full hash: 0/{total_full:,})..."
+        self._emit_progress(result, override_pct=0.85 if total_full > 0 else -1)
 
         for qh, items in qh_candidates.items():
             if self._cancel.is_set():
@@ -341,6 +354,11 @@ class Scanner:
             for filepath, size in items:
                 if self._cancel.is_set():
                     return
+                full_count += 1
+                pct = 0.85 + 0.14 * (full_count / total_full) if total_full > 0 else 0.99
+                result.current_path = f"Full hash ({full_count:,}/{total_full:,}): {filepath}"
+                self._emit_progress(result, override_pct=pct)
+
                 fh = self._file_hash(filepath)
                 if fh:
                     stat = safe_stat(filepath)
