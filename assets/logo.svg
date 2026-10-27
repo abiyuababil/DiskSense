@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="124" fill="#67e8f9" />
+  <!-- Storage sector breakdown stroke -->
+  <circle cx="256" cy="256" r="115" fill="none" stroke="#083344" stroke-width="38" stroke-dasharray="450 120" stroke-linecap="round" />
+  <circle cx="256" cy="256" r="32" fill="#083344" />
+</svg>
